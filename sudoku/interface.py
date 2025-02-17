@@ -73,62 +73,6 @@ def afficher_grille(grid, size, validate_input):
     for row in grid:
         print(" ".join(str(num) if num != 0 else '.' for num in row))
 
-def mode_sandbox():
-    """
-    Mode Sandbox, où l'utilisateur peut ajouter des chiffres sans validation.
-    """
-    print(Fore.CYAN + "\nMode Sandbox : Vous pouvez ajouter des chiffres sans validation." + Fore.RESET)
-
-    size_options = {1: 3, 2: 6, 3: 9}
-    print("1. Grille 3x3")
-    print("2. Grille 6x6")
-    print("3. Grille 9x9")
-    
-    size_choice = input("Choisissez la taille de la grille (1/2/3): ")
-    size = size_options.get(int(size_choice), 9)  # Par défaut, on prend la grille 9x9 si invalide
-
-    difficulty_options = {'1': 'easy', '2': 'medium', '3': 'hard'}
-    print("\nChoisissez la difficulté :")
-    print("1. Facile")
-    print("2. Moyen")
-    print("3. Difficile")
-
-    difficulty_choice = input("Choisissez la difficulté (1/2/3): ")
-    difficulty = difficulty_options.get(difficulty_choice, 'medium')
-
-    puzzle, solution = generate_sudoku(size, difficulty)
-    # Affichage initial de la grille
-    afficher_grille(puzzle, size, validate_input=False)
-
-    # Boucle principale du mode sandbox
-    action = ''
-    while action != '3':  # On continue jusqu'à ce que l'utilisateur choisisse de quitter
-        action = input(Fore.CYAN + "\nQue souhaitez-vous faire ?\n1. Ajouter un chiffre\n2. Afficher la grille\n3. Quitter\nChoisissez une option (1/2/3): ")
-        
-        if action == '1':
-            # Demander à l'utilisateur où ajouter un chiffre
-            row = int(input("\nEntrez la ligne (0-indexée) où vous souhaitez ajouter un chiffre : "))
-            col = int(input("Entrez la colonne (0-indexée) où vous souhaitez ajouter un chiffre : "))
-            num = int(input("Entrez le chiffre (1 à " + str(size) + "): "))
-            
-            if row < 0 or row >= size or col < 0 or col >= size:
-                print(Fore.RED + "Coordonnées invalides. Essayez encore." + Fore.RESET)
-                continue
-
-            # Ajout du chiffre sans validation
-            puzzle[row][col] = num
-
-            afficher_grille(puzzle, size, validate_input=False)
-
-        elif action == '2':
-            afficher_grille(puzzle, size, validate_input=False)
-
-        elif action == '3':
-            print(Fore.GREEN + "Merci d'avoir joué ! À bientôt !" + Fore.RESET)
-
-        else:
-            print(Fore.RED + "Option invalide. Essayez encore." + Fore.RESET)
-
 def is_valid(grid, row, col, num, size):
     """
     Vérifie si un nombre peut être placé dans la case (row, col).

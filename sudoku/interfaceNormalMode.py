@@ -1,5 +1,8 @@
 from colorama import Fore
-from sudoku.gridGeneratorNormalMode import generate_sudoku
+from gridGeneratorNormalMode import generate_sudoku
+
+# Historique des coups pour le undo
+history = []
 
 def mode_normal():
     """
@@ -7,10 +10,10 @@ def mode_normal():
     """
     print(Fore.CYAN + "\nMode Normal : Choisissez la taille et la difficulté de la grille" + Fore.RESET)
 
-    size_options = {1: 3, 2: 6, 3: 9}
-    print("1. Grille 3x3")
-    print("2. Grille 6x6")
-    print("3. Grille 9x9")
+    size_options = {1: 4, 2: 9, 3: 16}  # Tailles carrées parfaites
+    print("1. Grille 4x4")
+    print("2. Grille 9x9")
+    print("3. Grille 16x16")
     
     size_choice = input("Choisissez la taille de la grille (1/2/3): ")
     size = size_options.get(int(size_choice), 9)  # Par défaut, on prend la grille 9x9 si invalide
@@ -28,65 +31,77 @@ def mode_normal():
     validate_input = True if validation_choice == 'oui' else False
     
     puzzle, solution = generate_sudoku(size, difficulty)
+    fixed_positions = {(r, c) for r in range(size) for c in range(size) if puzzle[r][c] != 0}  # Sauvegarde des chiffres initiaux
+
     # Affichage initial de la grille
-    afficher_grille(puzzle, size, validate_input)
+    afficher_grille(puzzle, size, fixed_positions)
 
     # Boucle principale du jeu
     action = ''
-    while action != '3':  # On continue jusqu'à ce que l'utilisateur choisisse de quitter
-        action = input(Fore.CYAN + "\nQue souhaitez-vous faire ?\n1. Ajouter un chiffre\n2. Afficher la grille\n3. Quitter\nChoisissez une option (1/2/3): ")
+    while action != '4':  # On continue jusqu'à ce que l'utilisateur choisisse de quitter
+        action = input(Fore.CYAN + "\nQue souhaitez-vous faire ?\n1. Ajouter un chiffre\n2. Afficher la grille\n3. Annuler le dernier coup (Undo)\n4. Quitter\nChoisissez une option (1/2/3/4): ")
         
         if action == '1':
             # Demander à l'utilisateur où ajouter un chiffre
-            row = int(input("\nEntrez la colonne (en partant de la droite) où vous souhaitez ajouter un chiffre : "))
-            col = int(input("Entrez la ligne (en partant du haut) où vous souhaitez ajouter un chiffre : "))
+            row = int(input("\nEntrez la ligne (0-{}): ".format(size-1)))
+            col = int(input("Entrez la colonne (0-{}): ".format(size-1)))
             num = int(input("Entrez le chiffre (1 à " + str(size) + "): "))
             
             if row < 0 or row >= size or col < 0 or col >= size:
                 print(Fore.RED + "Coordonnées invalides. Essayez encore." + Fore.RESET)
                 continue
             
+            if (row, col) in fixed_positions:
+                print(Fore.RED + "Vous ne pouvez pas modifier un chiffre initial de la grille !" + Fore.RESET)
+                continue
+
             if validate_input:
-                if is_valid(puzzle, row, col, num, size):
+                if num == solution[row][col]:  # Comparaison avec la solution sauvegardée
+                    history.append((row, col, puzzle[row][col]))  # Sauvegarde pour undo
                     puzzle[row][col] = num
                 else:
-                    print(Fore.RED + "Le chiffre ne peut pas être placé ici." + Fore.RESET)
+                    print(Fore.RED + "Le chiffre est incorrect." + Fore.RESET)
             else:
+                history.append((row, col, puzzle[row][col]))
                 puzzle[row][col] = num
 
-            afficher_grille(puzzle, size, validate_input)
-
+            afficher_grille(puzzle, size, fixed_positions)
+        
         elif action == '2':
-            afficher_grille(puzzle, size, validate_input)
+            afficher_grille(puzzle, size, fixed_positions)
 
-        elif action == '3':
+        elif action == '3':  # Undo
+            if history:
+                row, col, prev_val = history.pop()
+                puzzle[row][col] = prev_val
+                print(Fore.YELLOW + "Dernier coup annulé." + Fore.RESET)
+            else:
+                print(Fore.RED + "Aucun coup à annuler." + Fore.RESET)
+            afficher_grille(puzzle, size, fixed_positions)
+
+        elif action == '4':
             print(Fore.GREEN + "Merci d'avoir joué ! À bientôt !" + Fore.RESET)
 
         else:
             print(Fore.RED + "Option invalide. Essayez encore." + Fore.RESET)
 
-def afficher_grille(grid, size, validate_input):
+def afficher_grille(grid, size, fixed_positions):
     """
-    Affiche la grille de Sudoku et gère les entrées de l'utilisateur.
+    Affiche la grille de Sudoku avec des bordures visuelles et mise en couleur.
     """
-    print("\nGrille actuelle :")
-    for row in grid:
-        print(" ".join(str(num) if num != 0 else '.' for num in row))
-
-def is_valid(grid, row, col, num, size):
-    """
-    Vérifie si un nombre peut être placé dans la case (row, col).
-    La vérification prend en compte la taille de la grille (3x3, 6x6, 9x9).
-    """
-    for i in range(size):
-        if grid[row][i] == num or grid[i][col] == num:
-            return False
-    
     box_size = int(size ** 0.5)
-    start_row, start_col = box_size * (row // box_size), box_size * (col // box_size)
-    for i in range(box_size):
-        for j in range(box_size):
-            if grid[start_row + i][start_col + j] == num:
-                return False
-    
-    return True
+    print("\nGrille actuelle :")
+    for i in range(size):
+        if i % box_size == 0 and i != 0:
+            print("-" * (size * 3 + box_size - 1))
+        for j in range(size):
+            if j % box_size == 0 and j != 0:
+                print("|", end=" ")
+            num = grid[i][j]
+            if num == 0:
+                print(". ", end=" ")
+            elif (i, j) in fixed_positions:
+                print(Fore.WHITE + str(num) + Fore.RESET, end="  ")  # Blanc pour chiffres initiaux
+            else:
+                print(Fore.YELLOW + str(num) + Fore.RESET, end="  ")  # Jaune pour entrées utilisateur
+        print()

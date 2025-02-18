@@ -4,7 +4,7 @@ import random
 import time
 import colorama
 from colorama import Fore
-from sudoku.interfaceNormalMode import mode_normal # Importation des modes de jeu
+from interfaceNormalMode import mode_normal # Importation des modes de jeu
 
 colorama.init()
 

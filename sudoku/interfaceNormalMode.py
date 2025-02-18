@@ -69,7 +69,7 @@ def mode_normal():
             afficher_grille(puzzle, size, fixed_positions)
             
             if all(all(cell != 0 for cell in row) for row in puzzle):
-                print(Back.WHITE + Fore.LIGHTGREEN_EX + "\nFélicitations ! Vous avez complété la grille !" + Fore.RESET + Back.RESET)
+                print(Fore.LIGHTGREEN_EX + "\nFélicitations ! Vous avez complété la grille !" + Fore.RESET)
                 return
 
         elif action == '2':

@@ -1,5 +1,5 @@
 from colorama import Fore
-from gridGenerator import generate_sudoku
+from sudoku.gridGeneratorNormalMode import generate_sudoku
 
 def mode_normal():
     """

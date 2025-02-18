@@ -63,6 +63,7 @@ class SudokuSolver:
                 values.add(num)
         return values
 
+
     def solve_mrv(self) -> bool:
         """Résout le Sudoku en utilisant l'heuristique Minimum Remaining Values"""
         empty = self.find_empty()
@@ -132,11 +133,12 @@ class SudokuSolver:
 
         return False
 
+
     def benchmark_solvers(self) -> dict:
         """Compare les performances des différents solveurs"""
         results = {}
-        grid_copy = [row[:] for row in self.grid]
-        
+        grid_copy = [row[:] for row in self.grid]  # Garde une copie de la grille initiale
+
         # Test du solveur récursif
         self.grid = [row[:] for row in grid_copy]
         start = time.time()
@@ -145,7 +147,7 @@ class SudokuSolver:
             'time': time.time() - start,
             'solved': recursive_solved
         }
-        
+
         # Test du solveur MRV
         self.grid = [row[:] for row in grid_copy]
         start = time.time()
@@ -154,7 +156,7 @@ class SudokuSolver:
             'time': time.time() - start,
             'solved': mrv_solved
         }
-        
+
         # Test du solveur itératif
         self.grid = [row[:] for row in grid_copy]
         start = time.time()
@@ -163,5 +165,5 @@ class SudokuSolver:
             'time': time.time() - start,
             'solved': iterative_solved
         }
-        
+
         return results

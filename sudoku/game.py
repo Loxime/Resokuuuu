@@ -1,15 +1,20 @@
 import sys
-from typing import List, Optional, Tuple
-import random
 import time
 import colorama
 from colorama import Fore, Back, Style
-from interfaceNormalMode import mode_normal # Importation des modes de jeu
+from typing import List, Optional
+from copy import deepcopy
+from solver import SudokuSolver
+from generator import SudokuGenerator
+from interfaceNormalMode import mode_normal  # Importation des modes de jeu
 
 colorama.init()
 
 class Sudoku:
     def __init__(self, size: int = 9):
+        if size not in [4, 9, 16]:  
+            raise ValueError("Seules les tailles 4x4, 9x9 et 16x16 sont supportées.")
+        
         self.size = size
         self.grid = [[0 for _ in range(size)] for _ in range(size)]
         self.box_size = int(size ** 0.5)
@@ -25,73 +30,10 @@ class Sudoku:
                 print(self.grid[i][j] if self.grid[i][j] != 0 else ".", end=" ")
             print()
 
-    def is_valid(self, num: int, pos: Tuple[int, int]) -> bool:
-        """Vérifie si un nombre peut être placé à une position donnée"""
-        row, col = pos
-
-        # Vérifier la ligne
-        if num in self.grid[row]:
-            return False
-
-        # Vérifier la colonne
-        for i in range(self.size):
-            if self.grid[i][col] == num:
-                return False
-
-        # Vérifier la boîte
-        box_x = col // self.box_size
-        box_y = row // self.box_size
-        for i in range(box_y * self.box_size, box_y * self.box_size + self.box_size):
-            for j in range(box_x * self.box_size, box_x * self.box_size + self.box_size):
-                if self.grid[i][j] == num:
-                    return False
-
-        return True
-
-    def find_empty(self) -> Optional[Tuple[int, int]]:
-        """Trouve une case vide dans la grille"""
-        for i in range(self.size):
-            for j in range(self.size):
-                if self.grid[i][j] == 0:
-                    return (i, j)
-        return None
-
-    def solve_recursive(self) -> bool:
-        """Résout le Sudoku avec backtracking récursif"""
-        empty = self.find_empty()
-        if not empty:
-            return True
-
-        row, col = empty
-        for num in range(1, self.size + 1):
-            if self.is_valid(num, (row, col)):
-                self.grid[row][col] = num
-                if self.solve_recursive():
-                    return True
-                self.grid[row][col] = 0
-
-        return False
-
     def generate(self, difficulty: str = "medium"):
         """Génère une nouvelle grille avec une difficulté spécifiée"""
-        # 1. Générer une grille complète
-        self.solve_recursive()
-
-        # 2. Définir le nombre de cases à retirer en fonction de la difficulté
-        difficulties = {
-            "easy": 35,
-            "medium": 45,
-            "hard": 55
-        }
-        cells_to_remove = difficulties.get(difficulty, 45)
-
-        # 3. Supprimer des chiffres aléatoirement tout en conservant une seule solution
-        positions = [(i, j) for i in range(self.size) for j in range(self.size)]
-        random.shuffle(positions)
-
-        for _ in range(cells_to_remove):
-            row, col = positions.pop()
-            self.grid[row][col] = 0
+        generator = SudokuGenerator(self.size)
+        self.grid = generator.generate(difficulty)
 
 def afficher_menu_principal():
     """
@@ -105,14 +47,63 @@ def afficher_menu_principal():
     print("2. Mode Solver (Générer et résoudre une nouvelle grille)")
     print("3. Mode Sandbox (Créez votre propre grille)")
     print("4. Quitter")
+
+def menu_solveur():
+    """Affiche un menu pour choisir le solveur"""
+    print("\nChoisissez un solveur :")
+    print("1. Backtracking Récursif")
+    print("2. Heuristique MRV")
+    print("3. Backtracking Itératif")
+    print("4. Forward Checking")
+    print("5. Quitter")
+    choix = input("Votre choix : ")
+    return int(choix) if choix.isdigit() else 5
+
+def resoudre_grille(sudoku: Sudoku, choix_solver: int, step_by_step: bool):
+    """Résout la grille en fonction du solveur choisi"""
+    solver = SudokuSolver(sudoku.grid, step_by_step)
     
+    solvers = {
+        1: solver.solve_recursive,
+        2: solver.solve_mrv,
+        3: solver.solve_iterative,
+        4: solver.solve_forward_checking
+    }
+    
+    if choix_solver in solvers:
+        print(f"\nRésolution avec le solveur {choix_solver}...")
+        start_time = time.perf_counter()
+        solved = solvers[choix_solver]()
+        end_time = time.perf_counter()
+        
+        if solved:
+            print("\nGrille résolue avec succès !")
+            sudoku.print_grid()
+            print(f"Temps de résolution : {end_time - start_time:.4f} secondes")
+        else:
+            print("\nAucune solution trouvée !")
+        return solved
+    else:
+        print("Choix invalide.")
+        return False
+
+def afficher_benchmark(grille_initiale: List[List[int]]):
+    """Affiche les résultats des benchmarks après résolution"""
+    choix = input("\nVoir les résultats du benchmark des solveurs ? (o/n) : ").lower()
+    if choix == 'o':
+        solver = SudokuSolver(deepcopy(grille_initiale))
+        results = solver.benchmark_solvers()
+        print("\n=== Benchmark des Solveurs ===")
+        for method, result in results.items():
+            print(f"{method.capitalize()} : {result['time']:.4f} sec - Solution trouvée : {'Oui' if result['solved'] else 'Non'}")
+
 def main():
     """
     Permet à l'utilisateur de choisir un mode.
     """
-    continue_program = True
+    continuer = True
     
-    while continue_program:
+    while continuer:
         afficher_menu_principal()
         choice = input("\nVotre choix (1-4): ")
 
@@ -120,19 +111,24 @@ def main():
             mode_normal()  # Redirige vers le mode normal du jeu
             
         elif choice == "2":
+            size = None
+            while size not in [4, 9, 16]:
+                try:
+                    size = int(input("Choisissez la taille de la grille (4, 9, 16) : ").strip())
+                    if size not in [4, 9, 16]:
+                        print("Erreur : Veuillez entrer 4, 9 ou 16.")
+                except ValueError:
+                    print("Erreur : Veuillez entrer un nombre valide.")
+            
             print("\nChoisissez la difficulté:")
             print("1. Facile")
             print("2. Moyen")
             print("3. Difficile")
 
             diff_choice = input("\nVotre choix (1-3): ")
-            difficulty = {
-                "1": "easy",
-                "2": "medium",
-                "3": "hard"
-            }.get(diff_choice, "medium")
+            difficulty = {"1": "easy", "2": "medium", "3": "hard"}.get(diff_choice, "medium")
 
-            sudoku = Sudoku()
+            sudoku = Sudoku(size)
             print("\nGénération de la grille...")
             sudoku.generate(difficulty)
 
@@ -141,50 +137,49 @@ def main():
 
             input("\nAppuyez sur Entrée pour voir la solution...")
 
-            start_time = time.time()
-            if sudoku.solve_recursive():
-                end_time = time.time()
-                print("\nSolution trouvée en {:.2f} secondes:".format(end_time - start_time))
-                sudoku.print_grid()
-            else:
-                print("\nErreur: Aucune solution trouvée !")
+            grille_initiale = deepcopy(sudoku.grid)
+            choix_solver = menu_solveur()
+            if choix_solver != 5:
+                step_by_step = input("\nVoulez-vous voir la résolution étape par étape ? (o/n) : ").lower() == 'o'
+                solved = resoudre_grille(sudoku, choix_solver, step_by_step)
+                if solved:
+                    afficher_benchmark(grille_initiale)
 
         elif choice == "3":
-            sudoku = Sudoku()
+            size = 9
+            sudoku = Sudoku(size)
             print("\nEntrez la grille ligne par ligne (utilisez 0 ou . pour les cases vides)")
-            print("Exemple: 5 3 0 0 7 0 0 0 0")
 
-            for i in range(9):
-                while True:
+            for i in range(size):
+                valid_input = False
+                while not valid_input:
                     try:
                         line = input(f"Ligne {i+1}: ").replace(".", "0")
                         numbers = [int(x) for x in line.split()]
-                        if len(numbers) != 9:
-                            raise ValueError
-                        if not all(0 <= x <= 9 for x in numbers):
+                        if len(numbers) != size or any(x < 0 or x > size for x in numbers):
                             raise ValueError
                         sudoku.grid[i] = numbers
-                        break
+                        valid_input = True
                     except ValueError:
-                        print("Erreur: veuillez entrer 9 chiffres entre 0 et 9")
+                        print(f"Erreur: veuillez entrer {size} chiffres entre 0 et {size}.")
 
             print("\nGrille entrée:")
             sudoku.print_grid()
 
-            start_time = time.time()
-            if sudoku.solve_recursive():
-                end_time = time.time()
-                print("\nSolution trouvée en {:.2f} secondes:".format(end_time - start_time))
-                sudoku.print_grid()
-            else:
-                print("\nAucune solution trouvée!")
+            grille_initiale = deepcopy(sudoku.grid)
+            choix_solver = menu_solveur()
+            if choix_solver != 5:
+                step_by_step = input("\nVoulez-vous voir la résolution étape par étape ? (o/n) : ").lower() == 'o'
+                solved = resoudre_grille(sudoku, choix_solver, step_by_step)
+                if solved:
+                    afficher_benchmark(grille_initiale)
 
         elif choice == "4":
             print(Back.WHITE + Fore.LIGHTBLUE_EX + "\nMerci d'avoir utilisé The Great Sudoku Solver!\n" + Fore.RESET + Back.RESET)
-            continue_program = False
+            continuer = False
 
         else:
-            print(Fore.RED +"\nChoix invalide, veuillez réessayer."+ Fore.RESET)
+            print(Fore.RED + "\nChoix invalide, veuillez réessayer." + Fore.RESET)
 
 if __name__ == "__main__":
     main()

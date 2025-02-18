@@ -2,6 +2,11 @@ import sys
 from typing import List, Optional, Tuple
 import random
 import time
+import colorama
+from colorama import Fore, Back, Style
+from interfaceNormalMode import mode_normal # Importation des modes de jeu
+
+colorama.init()
 
 class Sudoku:
     def __init__(self, size: int = 9):
@@ -13,10 +18,10 @@ class Sudoku:
         """Affiche la grille de manière formatée"""
         for i in range(self.size):
             if i % self.box_size == 0 and i != 0:
-                print("-" * (self.size * 2 + self.box_size))
+                print(Fore.LIGHTBLUE_EX + "-" * (self.size * 2 + self.box_size) + Fore.RESET)
             for j in range(self.size):
                 if j % self.box_size == 0 and j != 0:
-                    print("|", end=" ")
+                    print(Fore.LIGHTBLUE_EX + "|", end=" " + Fore.RESET)
                 print(self.grid[i][j] if self.grid[i][j] != 0 else ".", end=" ")
             print()
 
@@ -88,17 +93,33 @@ class Sudoku:
             row, col = positions.pop()
             self.grid[row][col] = 0
 
-def main():
-    print("=== Bienvenue dans le Sudoku Solver ===")
-    while True:
-        print("\nMenu principal:")
-        print("1. Générer et résoudre une nouvelle grille")
-        print("2. Entrer une grille manuellement")
-        print("3. Quitter")
+def afficher_menu_principal():
+    """
+    Affiche le menu principal du jeu.
+    """
+    text = "=== Bienvenue dans The Great Sudoku Solver ==="
+    formatted_text = Back.WHITE + Fore.LIGHTBLUE_EX + text + Style.RESET_ALL
 
-        choice = input("\nVotre choix (1-3): ")
+    print("\n" + formatted_text + "\n")
+    print("1. Mode Normal (Jeu avec grille générée)")
+    print("2. Mode Solver (Générer et résoudre une nouvelle grille)")
+    print("3. Mode Sandbox (Créez votre propre grille)")
+    print("4. Quitter")
+    
+def main():
+    """
+    Permet à l'utilisateur de choisir un mode.
+    """
+    continue_program = True
+    
+    while continue_program:
+        afficher_menu_principal()
+        choice = input("\nVotre choix (1-4): ")
 
         if choice == "1":
+            mode_normal()  # Redirige vers le mode normal du jeu
+            
+        elif choice == "2":
             print("\nChoisissez la difficulté:")
             print("1. Facile")
             print("2. Moyen")
@@ -128,7 +149,7 @@ def main():
             else:
                 print("\nErreur: Aucune solution trouvée !")
 
-        elif choice == "2":
+        elif choice == "3":
             sudoku = Sudoku()
             print("\nEntrez la grille ligne par ligne (utilisez 0 ou . pour les cases vides)")
             print("Exemple: 5 3 0 0 7 0 0 0 0")
@@ -158,12 +179,12 @@ def main():
             else:
                 print("\nAucune solution trouvée!")
 
-        elif choice == "3":
-            print("\nMerci d'avoir utilisé le Sudoku Solver!")
-            break
+        elif choice == "4":
+            print(Back.WHITE + Fore.LIGHTBLUE_EX + "\nMerci d'avoir utilisé The Great Sudoku Solver!\n" + Fore.RESET + Back.RESET)
+            continue_program = False
 
         else:
-            print("\nChoix invalide, veuillez réessayer.")
+            print(Fore.RED +"\nChoix invalide, veuillez réessayer."+ Fore.RESET)
 
 if __name__ == "__main__":
     main()

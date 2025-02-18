@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 import random
 import time
 import colorama
-from colorama import Fore
+from colorama import Fore, Back, Style
 from interfaceNormalMode import mode_normal # Importation des modes de jeu
 
 colorama.init()
@@ -18,10 +18,10 @@ class Sudoku:
         """Affiche la grille de manière formatée"""
         for i in range(self.size):
             if i % self.box_size == 0 and i != 0:
-                print("-" * (self.size * 2 + self.box_size))
+                print(Fore.LIGHTBLUE_EX + "-" * (self.size * 2 + self.box_size) + Fore.RESET)
             for j in range(self.size):
                 if j % self.box_size == 0 and j != 0:
-                    print("|", end=" ")
+                    print(Fore.LIGHTBLUE_EX + "|", end=" " + Fore.RESET)
                 print(self.grid[i][j] if self.grid[i][j] != 0 else ".", end=" ")
             print()
 
@@ -97,7 +97,10 @@ def afficher_menu_principal():
     """
     Affiche le menu principal du jeu.
     """
-    print(Fore.CYAN + "\n=== Bienvenue dans The Great Sudoku Solver ===\n" + Fore.RESET)
+    text = "=== Bienvenue dans The Great Sudoku Solver ==="
+    formatted_text = Back.WHITE + Fore.LIGHTBLUE_EX + text + Style.RESET_ALL
+
+    print("\n" + formatted_text + "\n")
     print("1. Mode Normal (Jeu avec grille générée)")
     print("2. Mode Solver (Générer et résoudre une nouvelle grille)")
     print("3. Mode Sandbox (Créez votre propre grille)")
@@ -177,7 +180,7 @@ def main():
                 print("\nAucune solution trouvée!")
 
         elif choice == "4":
-            print("\nMerci d'avoir utilisé le Sudoku Solver!")
+            print(Back.WHITE + Fore.LIGHTBLUE_EX + "\nMerci d'avoir utilisé The Great Sudoku Solver!\n" + Fore.RESET + Back.RESET)
             continue_program = False
 
         else:

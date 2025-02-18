@@ -1,4 +1,4 @@
-from colorama import Fore
+from colorama import Fore, Back
 from gridGeneratorNormalMode import generate_sudoku
 
 # Historique des coups pour le undo
@@ -8,9 +8,9 @@ def mode_normal():
     """
     Mode normal du jeu, où l'utilisateur choisit la taille et la difficulté de la grille.
     """
-    print(Fore.CYAN + "\nMode Normal : Choisissez la taille et la difficulté de la grille" + Fore.RESET)
+    print(Fore.CYAN + "\nMode Normal : Choisissez la taille et la difficulté de la grille\n" + Fore.RESET)
 
-    size_options = {1: 4, 2: 9, 3: 16}  # Tailles carrées parfaites
+    size_options = {1: 4, 2: 9, 3: 16} 
     print("1. Grille 4x4")
     print("2. Grille 9x9")
     print("3. Grille 16x16")
@@ -39,7 +39,7 @@ def mode_normal():
     # Boucle principale du jeu
     action = ''
     while action != '4':  # On continue jusqu'à ce que l'utilisateur choisisse de quitter
-        action = input(Fore.CYAN + "\nQue souhaitez-vous faire ?\n1. Ajouter un chiffre\n2. Afficher la grille\n3. Annuler le dernier coup (Undo)\n4. Quitter\nChoisissez une option (1/2/3/4): ")
+        action = input(Fore.CYAN + "\nQue souhaitez-vous faire ?\n1. Ajouter un chiffre\n2. Afficher la grille\n3. Annuler le dernier coup (Undo)\n4. Quitter\nChoisissez une option (1/2/3/4): " + Fore.RESET)
         
         if action == '1':
             # Demander à l'utilisateur où ajouter un chiffre
@@ -80,7 +80,7 @@ def mode_normal():
             afficher_grille(puzzle, size, fixed_positions)
 
         elif action == '4':
-            print(Fore.GREEN + "Merci d'avoir joué ! À bientôt !" + Fore.RESET)
+            print(Back.WHITE + Fore.LIGHTGREEN_EX + "\nMerci d'avoir joué ! À bientôt !" + Fore.RESET + Back.RESET)
 
         else:
             print(Fore.RED + "Option invalide. Essayez encore." + Fore.RESET)
@@ -90,13 +90,13 @@ def afficher_grille(grid, size, fixed_positions):
     Affiche la grille de Sudoku avec des bordures visuelles et mise en couleur.
     """
     box_size = int(size ** 0.5)
-    print("\nGrille actuelle :")
+    print("\nGrille actuelle :\n")
     for i in range(size):
         if i % box_size == 0 and i != 0:
-            print("-" * (size * 3 + box_size - 1))
+            print(Fore.BLUE + "-" * (size * 3 + box_size - 1) + Fore.RESET)
         for j in range(size):
             if j % box_size == 0 and j != 0:
-                print("|", end=" ")
+                print(Fore.BLUE + "|", end=" " + Fore.RESET)
             num = grid[i][j]
             if num == 0:
                 print(". ", end=" ")

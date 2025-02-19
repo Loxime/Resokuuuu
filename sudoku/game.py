@@ -36,9 +36,7 @@ class Sudoku:
         self.grid = generator.generate(difficulty)
 
 def afficher_menu_principal():
-    """
-    Affiche le menu principal du jeu.
-    """
+    """Affiche le menu principal du jeu."""
     text = "=== Bienvenue dans The Great Sudoku Solver ==="
     formatted_text = Back.WHITE + Fore.LIGHTBLUE_EX + text + Style.RESET_ALL
 
@@ -55,9 +53,10 @@ def menu_solveur():
     print("2. Heuristique MRV")
     print("3. Backtracking Itératif")
     print("4. Forward Checking")
-    print("5. Quitter")
+    print("5. Coloration de Graphe")
+    print("6. Quitter")
     choix = input("Votre choix : ")
-    return int(choix) if choix.isdigit() else 5
+    return int(choix) if choix.isdigit() else 6
 
 def resoudre_grille(sudoku: Sudoku, choix_solver: int, step_by_step: bool):
     """Résout la grille en fonction du solveur choisi"""
@@ -67,7 +66,8 @@ def resoudre_grille(sudoku: Sudoku, choix_solver: int, step_by_step: bool):
         1: solver.solve_recursive,
         2: solver.solve_mrv,
         3: solver.solve_iterative,
-        4: solver.solve_forward_checking
+        4: solver.solve_forward_checking,
+        5: solver.solve_graph_coloring
     }
     
     if choix_solver in solvers:
@@ -98,9 +98,7 @@ def afficher_benchmark(grille_initiale: List[List[int]]):
             print(f"{method.capitalize()} : {result['time']:.4f} sec - Solution trouvée : {'Oui' if result['solved'] else 'Non'}")
 
 def main():
-    """
-    Permet à l'utilisateur de choisir un mode.
-    """
+    """Permet à l'utilisateur de choisir un mode."""
     continuer = True
     
     while continuer:
@@ -115,10 +113,10 @@ def main():
             while size not in [4, 9, 16]:
                 try:
                     size = int(input("Choisissez la taille de la grille (4, 9, 16) : ").strip())
-                    if size not in [4, 9, 16]:
-                        print("Erreur : Veuillez entrer 4, 9 ou 16.")
                 except ValueError:
-                    print("Erreur : Veuillez entrer un nombre valide.")
+                    size = None
+                if size not in [4, 9, 16]:
+                    print("Erreur : Veuillez entrer 4, 9 ou 16.")
             
             print("\nChoisissez la difficulté:")
             print("1. Facile")
@@ -139,7 +137,7 @@ def main():
 
             grille_initiale = deepcopy(sudoku.grid)
             choix_solver = menu_solveur()
-            if choix_solver != 5:
+            if choix_solver != 6:
                 step_by_step = input("\nVoulez-vous voir la résolution étape par étape ? (o/n) : ").lower() == 'o'
                 solved = resoudre_grille(sudoku, choix_solver, step_by_step)
                 if solved:
@@ -168,7 +166,7 @@ def main():
 
             grille_initiale = deepcopy(sudoku.grid)
             choix_solver = menu_solveur()
-            if choix_solver != 5:
+            if choix_solver != 6:
                 step_by_step = input("\nVoulez-vous voir la résolution étape par étape ? (o/n) : ").lower() == 'o'
                 solved = resoudre_grille(sudoku, choix_solver, step_by_step)
                 if solved:

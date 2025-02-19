@@ -8,12 +8,12 @@ def is_valid(grid, row, col, num, size):
     """
     box_size = int(size ** 0.5)
 
-    # Vérifier ligne et colonne
+
     for i in range(size):
         if grid[row][i] == num or grid[i][col] == num:
             return False
     
-    # Vérifier sous-grille
+
     start_row, start_col = (row // box_size) * box_size, (col // box_size) * box_size
     for i in range(box_size):
         for j in range(box_size):
@@ -44,14 +44,14 @@ def generate_full_grid(size):
     """
     grid = [[0 for _ in range(size)] for _ in range(size)]
     
-    # Remplissage initial aléatoire pour créer une variation
-    for _ in range(size * 2):  # Augmenter si nécessaire pour plus de diversité
+
+    for _ in range(size * 2):  
         row, col = random.randint(0, size - 1), random.randint(0, size - 1)
         num = random.randint(1, size)
         if is_valid(grid, row, col, num, size):
             grid[row][col] = num
 
-    # Résolution complète pour obtenir une vraie grille de Sudoku
+
     solve(grid, size)
     
     return grid
@@ -60,7 +60,7 @@ def remove_numbers(grid, size, difficulty='medium'):
     """
     Supprime des chiffres de la grille complète pour créer un puzzle avec une difficulté donnée.
     """
-    difficulties = {'easy': 0.4, 'medium': 0.5, 'hard': 0.6}  # Pourcentage de cases vides
+    difficulties = {'easy': 0.4, 'medium': 0.5, 'hard': 0.6}  
     num_remove = int(size * size * difficulties.get(difficulty, 0.5))
 
     puzzle = deepcopy(grid)

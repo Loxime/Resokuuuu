@@ -1,7 +1,7 @@
 from colorama import Fore, Back
 from gridGeneratorNormalMode import generate_sudoku
 
-# Historique des coups pour le undo
+
 history = []
 
 def mode_normal():
@@ -16,7 +16,7 @@ def mode_normal():
     print("3. Grille 16x16")
     
     size_choice = input("Choisissez la taille de la grille (1/2/3): ")
-    size = size_options.get(int(size_choice), 9)  # Par défaut, on prend la grille 9x9 si invalide
+    size = size_options.get(int(size_choice), 9)  
 
     difficulty_options = {'1': 'easy', '2': 'medium', '3': 'hard'}
     print("\nChoisissez la difficulté :")

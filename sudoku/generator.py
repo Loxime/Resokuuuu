@@ -21,7 +21,7 @@ class SudokuGenerator:
             if self.grid[i][col] == num:
                 return False
 
-        # Vérifier la sous-grille
+
         box_x = col // self.box_size
         box_y = row // self.box_size
         for i in range(box_y * self.box_size, (box_y + 1) * self.box_size):

@@ -115,7 +115,6 @@ def afficher_grille(grid, size, fixed_positions):
 
 def afficher_solution(solution, size):
     box_size = int(size ** 0.5)
-    print("\nSolution de la grille :\n")
     for i in range(size):
         if i % box_size == 0 and i != 0:
             print(Fore.GREEN + "-" * (size * 3 + box_size - 1) + Fore.RESET)

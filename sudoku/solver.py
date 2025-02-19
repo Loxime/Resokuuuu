@@ -19,15 +19,12 @@ class SudokuSolver:
                 node = (row, col)
                 neighbors = []
 
-                # Voisins sur la même ligne
                 for c in range(self.size):
                     if c != col:
                         neighbors.append((row, c))
-                # Voisins sur la même colonne
                 for r in range(self.size):
                     if r != row:
                         neighbors.append((r, col))
-                # Voisins dans le même carré
                 box_row = (row // self.box_size) * self.box_size
                 box_col = (col // self.box_size) * self.box_size
                 for i in range(self.box_size):
@@ -44,32 +41,28 @@ class SudokuSolver:
         import matplotlib.pyplot as plt
 
         G = nx.Graph()
-        # Ajout des nœuds et des arêtes depuis self.graph
         for node, neighbors in self.graph.items():
             G.add_node(node)
             for neighbor in neighbors:
                 if not G.has_edge(node, neighbor):
                     G.add_edge(node, neighbor)
         
-        pos = nx.spring_layout(G, seed=42)  # disposition pour une meilleure lisibilité
+        pos = nx.spring_layout(G, seed=42)  
         plt.figure(figsize=(8, 8))
         nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', node_size=500)
         plt.title("Représentation en Graphe du Sudoku")
         plt.show(block=False)
-        plt.pause(50)  # Affiche pendant 2 secondes
-        # plt.close()
+        plt.pause(10) 
+        plt.close()
 
 
     def is_valid(self, num: int, pos: Tuple[int, int]) -> bool:
         """Vérifie si num peut être placé à pos sans violer les contraintes du Sudoku."""
         row, col = pos
-        # Vérifier la ligne
         if num in self.grid[row]:
             return False
-        # Vérifier la colonne
         if any(self.grid[i][col] == num for i in range(self.size)):
             return False
-        # Vérifier le carré
         start_row = (row // self.box_size) * self.box_size
         start_col = (col // self.box_size) * self.box_size
         for i in range(start_row, start_row + self.box_size):
@@ -200,7 +193,6 @@ class SudokuSolver:
         Résout le Sudoku en utilisant un algorithme de coloration de graphe.
         Avant de démarrer, affiche le graphe du Sudoku à l'aide de NetworkX.
         """
-        # Afficher le graphe du Sudoku visuellement
         self.visualize_graph()
 
         colors = {cell: 0 for cell in self.graph}

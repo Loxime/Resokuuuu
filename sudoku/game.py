@@ -6,7 +6,7 @@ from typing import List, Optional
 from copy import deepcopy
 from solver import SudokuSolver
 from generator import SudokuGenerator
-from interfaceNormalMode import mode_normal  # Importation des modes de jeu
+from interfaceNormalMode import mode_normal
 
 colorama.init()
 
@@ -106,7 +106,7 @@ def main():
         choice = input("\nVotre choix (1-4): ")
 
         if choice == "1":
-            mode_normal()  # Redirige vers le mode normal du jeu
+            mode_normal() 
             
         elif choice == "2":
             size = None

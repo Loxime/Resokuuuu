@@ -93,7 +93,7 @@ def afficher_benchmark(grille_initiale: List[List[int]]):
     if choix == 'o':
         solver = SudokuSolver(deepcopy(grille_initiale))
         results = solver.benchmark_solvers()
-        print("\n=== Benchmark des Solveurs ===")
+        print(Fore.GREEN + "\n=== Benchmark des Solveurs ===\n" + Fore.RESET)
         for method, result in results.items():
             print(f"{method.capitalize()} : {result['time']:.4f} sec - Solution trouvée : {'Oui' if result['solved'] else 'Non'}")
 
